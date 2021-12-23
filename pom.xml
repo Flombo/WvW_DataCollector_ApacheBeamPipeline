@@ -51,6 +51,29 @@
             <artifactId>json</artifactId>
             <version>20210307</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.beam/beam-sdks-java-extensions-json-jackson -->
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-extensions-json-jackson</artifactId>
+            <version>2.34.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.auto.value/auto-value-annotations -->
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.auto.value/auto-value-annotations -->
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value-annotations</artifactId>
+            <version>1.9</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+
+
 
     </dependencies>
 
