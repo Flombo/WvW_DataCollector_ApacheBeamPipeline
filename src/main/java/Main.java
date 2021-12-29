@@ -1,19 +1,13 @@
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
-import org.apache.beam.sdk.schemas.AutoValueSchema;
-import org.apache.beam.sdk.schemas.Schema;
-import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
-import org.apache.beam.sdk.schemas.transforms.Convert;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.JsonToRow;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.Row;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.joda.time.Duration;
 import org.apache.beam.sdk.extensions.jackson.*;
 
 public class Main {
@@ -23,49 +17,72 @@ public class Main {
         try {
             Pipeline pipeline = Pipeline.create();
 
-            pipeline.getSchemaRegistry().registerPOJO(Match.class);
-            Schema s = pipeline.getSchemaRegistry().getSchema(Match.class);
-
-            PCollection<Match> data = pipeline.apply(
+            /*
+            Read from Kafka over KafkaIO.
+             */
+            PCollection<KafkaRecord<Long, String>> data = pipeline.apply(
                     KafkaIO.<Long, String>read()
                             .withBootstrapServers("localhost:9092")
-                            .withTopic("2-1")
+                            .withTopic(args[0])
                             .withKeyDeserializer(LongDeserializer.class)
                             .withValueDeserializer(StringDeserializer.class)
-            ).apply(ParDo.of(new ParseJsonToString()))
-                    .apply(JsonToRow.withSchema(s))
-                    .apply(Convert.to(Match.class));
+            );
+
+            /*
+             * Extract the string values from the KafkaRecord for further processing.
+             * The strings are needed, because only they hold the json data.
+            */
+            PCollection<String> extractedJSONStrings = data.apply(ParDo.of(new RetrieveStringFromKafkaRecord()));
+
+            /*
+             * Parses json-string to the class Match for oop-like data access.
+             * PTransform needs coder for deserializing the string.
+             */
+            PCollection<Match> matches = extractedJSONStrings
+                    .apply(ParseJsons.of(Match.class))
+                    .setCoder(SerializableCoder.of(Match.class));
+
+            matches.apply(ParDo.of(new PrintMatchCollection()));
 
 
-            PCollection<String> output;
+            //Pipeline could crash due to exceptions while deserializing.
+            try {
+                PipelineResult pipelineResult = pipeline.run();
+                pipelineResult.waitUntilFinish();
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
 
-            data.apply(ParDo.of(new Print()));
-
-
-            PipelineResult run = pipeline.run();
-
-            run.waitUntilFinish(Duration.standardSeconds(-1));
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
 
-    public static class Print extends DoFn<Match, String>
-    {
+    public static class PrintMatchCollection extends DoFn<Match, Match> {
         @ProcessElement
-        public void processElement(@Element PCollection<Match> input, OutputReceiver<String> out)
-        {
-            System.out.println(input.toString());
-            out.output(input.toString());
+        public void processElement(@Element Match input, OutputReceiver<Match> out) {
+            System.out.println(input.id);
+            out.output(input);
         }
     }
 
-    public static class ParseJsonToString extends DoFn<KafkaRecord<Long,String>, String>
+    public static class PrintStringCollection extends DoFn<String, String> {
+        @ProcessElement
+        public void processElement(@Element String input, OutputReceiver<String> out) {
+            System.out.println(input);
+            out.output(input);
+        }
+    }
+
+    /*
+    Extracts the string value of the given KafkaRecord.
+    Only the string value contains the json data which will be further processed.
+     */
+    public static class RetrieveStringFromKafkaRecord extends DoFn<KafkaRecord<Long,String>, String>
     {
         @ProcessElement
         public void processElement(@Element KafkaRecord<Long,String> input, OutputReceiver<String>out)
         {
-            input.getKV().getValue();
             out.output(input.getKV().getValue());
 
         }
