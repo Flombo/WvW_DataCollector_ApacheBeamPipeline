@@ -69,8 +69,9 @@ public class Main
     public static class PrintMatchCollection extends DoFn<Match, Match>
     {
         @ProcessElement
-        public void processElement(@Element Match input, OutputReceiver<Match> out) {
-            System.out.println(input.id);
+        public void processElement(@Element Match input, OutputReceiver<Match> out)
+        {
+            System.out.println(input.toString());
             out.output(input);
         }
     }
