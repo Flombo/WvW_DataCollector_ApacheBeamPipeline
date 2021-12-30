@@ -10,11 +10,14 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.beam.sdk.extensions.jackson.*;
 
-public class Main {
+public class Main
+{
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
 
-        try {
+        try
+        {
             Pipeline pipeline = Pipeline.create();
 
             /*
@@ -46,19 +49,25 @@ public class Main {
 
 
             //Pipeline could crash due to exceptions while deserializing.
-            try {
+            try
+            {
                 PipelineResult pipelineResult = pipeline.run();
                 pipelineResult.waitUntilFinish();
-            } catch (Exception exc) {
+            }
+            catch (Exception exc)
+            {
                 exc.printStackTrace();
             }
 
-        } catch (Exception exception) {
+        }
+        catch (Exception exception)
+        {
             exception.printStackTrace();
         }
     }
 
-    public static class PrintMatchCollection extends DoFn<Match, Match> {
+    public static class PrintMatchCollection extends DoFn<Match, Match>
+    {
         @ProcessElement
         public void processElement(@Element Match input, OutputReceiver<Match> out) {
             System.out.println(input.id);
@@ -66,9 +75,11 @@ public class Main {
         }
     }
 
-    public static class PrintStringCollection extends DoFn<String, String> {
+    public static class PrintStringCollection extends DoFn<String, String>
+    {
         @ProcessElement
-        public void processElement(@Element String input, OutputReceiver<String> out) {
+        public void processElement(@Element String input, OutputReceiver<String> out)
+        {
             System.out.println(input);
             out.output(input);
         }
@@ -76,7 +87,7 @@ public class Main {
 
     /*
     Extracts the string value of the given KafkaRecord.
-    Only the string value contains the json data which will be further processed.
+    Only the string value containing the json data will be further processed.
      */
     public static class RetrieveStringFromKafkaRecord extends DoFn<KafkaRecord<Long,String>, String>
     {
