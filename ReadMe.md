@@ -24,4 +24,9 @@
 
 2. Pipeline execution
    1. Go to ~/Projects/Java/
-   2. Run mvn -X compile exec:java -Dexec.mainClass=java/Main -Dexec.args="Topic-Name"
+   2. Run mvn: -X compile exec:java -Dexec.mainClass=java/Main -Dexec.args="Topic-Name"
+   
+
+3. Start Zookeeper, Kafka and JS server via Script
+   1. Go to ~/Project/Java/
+   2. Run: bash initializtion.sh 
