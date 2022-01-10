@@ -1,3 +1,5 @@
+package Models;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import java.io.Serializable;
@@ -9,15 +11,15 @@ public class WVWMap implements Serializable
 {
     public int id;
     public String type;
-    public TeamAttributes scores;
+    public TeamAttribute scores;
     public List<Bonus> bonuses;
-    public List<Objectives> objectives;
-    public TeamAttributes deaths;
-    public TeamAttributes kills;
+    public List<Objective> objectives;
+    public TeamAttribute deaths;
+    public TeamAttribute kills;
 
     @Override
     public String toString() {
-        return "WVWMap{" +
+        return "Models.WVWMap{" +
                 "id=" + id +
                 ", type='" + type + '\'' +
                 ", scores=" + scores +

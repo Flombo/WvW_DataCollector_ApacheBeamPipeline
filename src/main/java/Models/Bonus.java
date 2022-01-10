@@ -1,3 +1,5 @@
+package Models;
+
 import java.io.Serializable;
 
 public class Bonus implements Serializable
@@ -7,7 +9,7 @@ public class Bonus implements Serializable
 
     @Override
     public String toString() {
-        return "Bonus{" +
+        return "Models.Bonus{" +
                 "type='" + type + '\'' +
                 ", owner='" + owner + '\'' +
                 '}';

@@ -24,9 +24,13 @@
 
 2. Pipeline execution
    1. Go to ~/Projects/Java/
-   2. Run mvn: -X compile exec:java -Dexec.mainClass=java/Main -Dexec.args="Topic-Name"
+   2. Run mvn -X compile exec:java -Dexec.mainClass=java/Main -Dexec.args="2-1"
    
 
 3. Start Zookeeper, Kafka and JS server via Script
    1. Go to ~/Project/Java/
-   2. Run: bash initializtion.sh 
+   2. Run: bash initializtion.sh
+4. Start Grafana
+   1. sudo systemctl start grafana-server
+   2. Grafana aufrufen unter: http://141.28.73.146:8000/
+   3. Username/Passwd: admin
