@@ -8,7 +8,7 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TeamAttribute implements Serializable
 {
-    public int red;
-    public int blue;
-    public int green;
+    private int red;
+    private int blue;
+    private int green;
 }

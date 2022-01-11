@@ -1,4 +1,5 @@
 import Models.Match;
+import Models.Population;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -66,6 +67,8 @@ public class Main
             );
 
             PCollection<HashMap<Integer, Long>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
+
+            PCollection<HashMap<String, Population>> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulation()));
 
             //Pipeline could crash due to exceptions while deserializing.
             try

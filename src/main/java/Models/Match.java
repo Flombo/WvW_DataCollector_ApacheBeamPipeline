@@ -13,19 +13,19 @@ public class Match implements Serializable
     /**
      * Models.Match is a POJO implementation for the v2/wvw/matches/ API call of the Guild Wars 2 API
      * Modeling of the object is made possible through implementation of the 'serializable' interface
-     * The attributes are extracted into seperate classes aside from attributes that are not nested
+     * The attributes are extracted into separate classes aside from attributes that are not nested
      */
 
-    public String id;
+    private String id;
     @JsonProperty("start_time")
-    public String startTime;
-    public TeamAttribute scores;
-    public World worlds;
-    public TeamAttribute deaths;
-    public TeamAttribute kills;
+    private String startTime;
+    private TeamAttribute scores;
+    private World worlds;
+    private TeamAttribute deaths;
+    private TeamAttribute kills;
     @JsonProperty("victory_points")
-    public TeamAttribute victoryPoints;
-    public List<WVWMap> maps;
+    private TeamAttribute victoryPoints;
+    private List<WVWMap> maps;
 
 
 

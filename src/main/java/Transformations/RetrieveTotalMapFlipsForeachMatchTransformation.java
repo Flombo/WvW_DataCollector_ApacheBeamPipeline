@@ -21,9 +21,9 @@ public class RetrieveTotalMapFlipsForeachMatchTransformation extends DoFn<Match,
     {
         HashMap<Integer, Long> totalFlipAmountForeachMap = new HashMap<>();
 
-        for (WVWMap map : input.maps) {
-            long totalMapFlipAmount = getTotalFlipsPerObjective(map.objectives);
-            totalFlipAmountForeachMap.put(map.id, totalMapFlipAmount);
+        for (WVWMap map : input.getMaps()) {
+            long totalMapFlipAmount = getTotalFlipsPerObjective(map.getObjectives());
+            totalFlipAmountForeachMap.put(map.getId(), totalMapFlipAmount);
         }
 
         out.output(totalFlipAmountForeachMap);
@@ -35,12 +35,15 @@ public class RetrieveTotalMapFlipsForeachMatchTransformation extends DoFn<Match,
         long totalMapFlipAmount = 0;
 
         for (Objective objective : objectives) {
+
+            String currentLastFlipped = objective.getLastFlipped();
+
             if(lastFlip != null) {
-                if(!lastFlip.equals(objective.lastFlipped)) {
+                if(!lastFlip.equals(currentLastFlipped)) {
                     totalMapFlipAmount++;
                 }
             }
-            lastFlip = objective.lastFlipped;
+            lastFlip = currentLastFlipped;
         }
 
         return totalMapFlipAmount;

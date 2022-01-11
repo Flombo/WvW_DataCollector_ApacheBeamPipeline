@@ -8,9 +8,9 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class World implements Serializable {
 
-    public WorldObject red;
-    public WorldObject blue;
-    public WorldObject green;
+    private WorldObject red;
+    private WorldObject blue;
+    private WorldObject green;
 
     @Override
     public String toString() {

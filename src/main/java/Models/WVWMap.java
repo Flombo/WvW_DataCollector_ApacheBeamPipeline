@@ -9,18 +9,22 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WVWMap implements Serializable
 {
-    public int id;
-    public String type;
-    public TeamAttribute scores;
-    public List<Bonus> bonuses;
-    public List<Objective> objectives;
-    public TeamAttribute deaths;
-    public TeamAttribute kills;
+    private int id;
+    private String name;
+    private String type;
+    private TeamAttribute scores;
+    private List<Bonus> bonuses;
+    private List<Objective> objectives;
+    private TeamAttribute deaths;
+    private TeamAttribute kills;
+
+
 
     @Override
     public String toString() {
         return "Models.WVWMap{" +
                 "id=" + id +
+                "name=" + name +
                 ", type='" + type + '\'' +
                 ", scores=" + scores +
                 ", bonuses=" + bonuses +

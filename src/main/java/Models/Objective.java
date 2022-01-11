@@ -9,23 +9,23 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Objective implements Serializable
 {
-    public String id;
-    public String type;
-    public String owner;
+    private String id;
+    private String type;
+    private String owner;
     @JsonProperty("last_flipped")
-    public String lastFlipped;
+    private String lastFlipped;
     @JsonProperty("claimed_by")
-    public String claimedBy;
+    private String claimedBy;
 
     @JsonProperty("claimed_at")
-    public String claimedAt;
+    private String claimedAt;
 
     @JsonProperty("points_tick")
-    public int pointsTick;
+    private int pointsTick;
     @JsonProperty("points_capture")
-    public int pointsCapture;
+    private int pointsCapture;
     @JsonProperty("yaks_delivered")
-    public int yaksDelivered;
+    private int yaksDelivered;
 
 
     @Override
