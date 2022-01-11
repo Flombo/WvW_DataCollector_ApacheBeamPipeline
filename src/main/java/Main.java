@@ -1,5 +1,6 @@
 import Models.Match;
 import Models.Population;
+import Models.ResultModels.VictoryMetric;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -14,6 +15,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.beam.sdk.extensions.jackson.*;
 import org.joda.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 
 public class Main
 {
@@ -69,6 +71,8 @@ public class Main
             PCollection<HashMap<Integer, Long>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
 
             PCollection<HashMap<String, Population>> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulation()));
+
+            PCollection<List<VictoryMetric>> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsForMatch()));
 
             //Pipeline could crash due to exceptions while deserializing.
             try
