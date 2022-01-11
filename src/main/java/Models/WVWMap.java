@@ -18,8 +18,6 @@ public class WVWMap implements Serializable
     private TeamAttribute deaths;
     private TeamAttribute kills;
 
-
-
     @Override
     public String toString() {
         return "Models.WVWMap{" +

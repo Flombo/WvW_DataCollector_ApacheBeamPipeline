@@ -68,6 +68,8 @@ public class Main
                             )
             );
 
+            slidingWindowedMatches.apply(ParDo.of(new PrintMatchCollectionTransformation()));
+
             PCollection<HashMap<Integer, Long>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
 
             PCollection<HashMap<String, Population>> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulation()));

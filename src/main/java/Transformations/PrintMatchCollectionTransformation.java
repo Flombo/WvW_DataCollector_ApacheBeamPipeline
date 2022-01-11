@@ -8,7 +8,7 @@ public class PrintMatchCollectionTransformation extends DoFn<Match, Match>
     @ProcessElement
     public void processElement(@Element Match match, OutputReceiver<Match> out)
     {
-        System.out.println(match.getWorlds().toString());
+        System.out.println(match.toString());
         out.output(match);
     }
 }

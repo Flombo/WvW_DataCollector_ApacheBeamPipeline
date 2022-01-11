@@ -1,7 +1,11 @@
 package Models;
 
+import lombok.Data;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.io.Serializable;
 
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bonus implements Serializable
 {
     private String type;
