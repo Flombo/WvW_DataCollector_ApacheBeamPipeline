@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="VM" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="PipelineVM" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="VM">
+      <paths name="DatabaseVM">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="PipelineVM">
         <serverdata>
           <mappings>
             <mapping deploy="/Java" local="$PROJECT_DIR$" web="/" />

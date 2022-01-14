@@ -1,18 +1,22 @@
 import Models.Match;
 import Models.Population;
+import Models.ResultModels.TotalFlip;
 import Models.ResultModels.VictoryMetric;
+import Models.Bonus;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.coders.SerializableCoder;
+import org.apache.beam.sdk.extensions.jackson.ParseJsons;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
+import org.apache.beam.sdk.io.mongodb.MongoDbIO;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.*;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.beam.sdk.extensions.jackson.*;
+import org.bson.Document;
 import org.joda.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -68,13 +72,24 @@ public class Main
                             )
             );
 
-            slidingWindowedMatches.apply(ParDo.of(new PrintMatchCollectionTransformation()));
-
-            PCollection<HashMap<Integer, Long>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
+            PCollection<List<TotalFlip>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
 
             PCollection<HashMap<String, Population>> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulation()));
 
             PCollection<List<VictoryMetric>> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsForMatch()));
+
+            PCollection<HashMap<String, List<Bonus>>> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonuses()));
+
+            PCollection<Document> totalFlipsDocuments = totalFlipsForEachMatch.apply(ParDo.of(new RetrieveBSONDocumentFromTotalFlipsTransformation()));
+
+            //write totalFlipsDocuments into MongoDB totalflips-collection.
+            totalFlipsDocuments.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase("test")
+                            .withCollection("totalflips")
+            );
+
 
             //Pipeline could crash due to exceptions while deserializing.
             try

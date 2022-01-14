@@ -2,8 +2,15 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="6a16852a-152a-4f82-be83-866dce0a762b" name="VM">
-        <fileTransfer rootFolder="/home/user01/Project" accessType="SFTP" host="141.28.73.146" port="22" sshConfigId="194de28a-b427-4dd4-a323-f70c792e33df" sshConfig="user01@141.28.73.146:22 password">
+      <webServer id="6a16852a-152a-4f82-be83-866dce0a762b" name="PipelineVM">
+        <fileTransfer rootFolder="/home/user01/Project" accessType="SFTP" host="141.28.73.146" port="22" sshConfigId="67724c4a-cadd-41e6-8d39-ac1b8017f7e4" sshConfig="user01@141.28.73.146:22">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="f9a5f09b-a4fe-4cb8-bdcd-b93fab0d4725" name="DatabaseVM">
+        <fileTransfer accessType="SFTP" host="141.28.73.145" port="22" sshConfigId="194de28a-b427-4dd4-a323-f70c792e33df" sshConfig="user01@141.28.73.145:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
