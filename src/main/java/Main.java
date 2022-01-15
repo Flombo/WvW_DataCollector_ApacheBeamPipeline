@@ -1,8 +1,4 @@
 import Models.Match;
-import Models.Population;
-import Models.ResultModels.TotalFlip;
-import Models.ResultModels.VictoryMetric;
-import Models.Bonus;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -18,8 +14,6 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.bson.Document;
 import org.joda.time.Duration;
-import java.util.HashMap;
-import java.util.List;
 
 public class Main
 {
@@ -29,6 +23,7 @@ public class Main
 
         try
         {
+            String topicName = args[0];
             Pipeline pipeline = Pipeline.create();
 
             /*
@@ -37,7 +32,7 @@ public class Main
             PCollection<KafkaRecord<Long, String>> data = pipeline.apply(
                     KafkaIO.<Long, String>read()
                             .withBootstrapServers("localhost:9092")
-                            .withTopic(args[0])
+                            .withTopic(topicName)
                             .withKeyDeserializer(LongDeserializer.class)
                             .withValueDeserializer(StringDeserializer.class)
             );
@@ -72,24 +67,42 @@ public class Main
                             )
             );
 
-            PCollection<List<TotalFlip>> totalFlipsForEachMatch = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchTransformation()));
+            PCollection<Document> totalFlipsDocuments = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
 
-            PCollection<HashMap<String, Population>> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulation()));
+            PCollection<Document> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulationAsBSONDocument()));
 
-            PCollection<List<VictoryMetric>> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsForMatch()));
+            PCollection<Document> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsAsBSONDocumentForMatch()));
 
-            PCollection<HashMap<String, List<Bonus>>> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonuses()));
-
-            PCollection<Document> totalFlipsDocuments = totalFlipsForEachMatch.apply(ParDo.of(new RetrieveBSONDocumentFromTotalFlipsTransformation()));
+            PCollection<Document> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonusesAsBSONDocument()));
 
             //write totalFlipsDocuments into MongoDB totalflips-collection.
             totalFlipsDocuments.apply(
                     MongoDbIO.write()
                             .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase("test")
+                            .withDatabase(topicName)
                             .withCollection("totalflips")
             );
 
+            populationPerWorld.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("peaktime")
+            );
+
+            victoryMetrics.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("victorymetrics")
+            );
+
+            bloodlustBuffs.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("mapbonuses")
+            );
 
             //Pipeline could crash due to exceptions while deserializing.
             try
