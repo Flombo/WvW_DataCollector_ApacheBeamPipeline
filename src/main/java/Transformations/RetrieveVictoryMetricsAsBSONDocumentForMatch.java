@@ -17,35 +17,37 @@ import java.util.HashMap;
  *     },
  *     blue: {..},
  *     green: {..},
- *     timestamp : ''
+ *     timestamp : '',
+ *     starttime : '',
+ *     endtime : ''
  * }
  */
 public class RetrieveVictoryMetricsAsBSONDocumentForMatch extends DoFn<Match, Document>
 {
     @ProcessElement
-    public void processElement(@Element Match match, OutputReceiver<Document> outputReceiver) {
+    public void processElement(@Element Match input, OutputReceiver<Document> outputReceiver) {
         Document document = new Document();
         HashMap<String, HashMap<String, Object>> victoryMetrics = new HashMap<>();
         HashMap<String, Object> populationAttributes = new HashMap<>();
 
         HashMap<String, Object> victoryMetricsRed = new HashMap<>();
-        victoryMetricsRed.put("victorypoints", match.getVictoryPoints().getRed());
-        populationAttributes.put("name", match.getWorlds().getRed().getName());
-        populationAttributes.put("population", match.getWorlds().getRed().getPopulation().getNumericValue());
+        victoryMetricsRed.put("victorypoints", input.getVictoryPoints().getRed());
+        populationAttributes.put("name", input.getWorlds().getRed().getName());
+        populationAttributes.put("population", input.getWorlds().getRed().getPopulation().getNumericValue());
         victoryMetricsRed.put("population", populationAttributes.clone());
         populationAttributes.clear();
 
         HashMap<String, Object> victoryMetricsBlue = new HashMap<>();
-        victoryMetricsBlue.put("victorypoints", match.getVictoryPoints().getBlue());
-        populationAttributes.put("name", match.getWorlds().getBlue().getName());
-        populationAttributes.put("population", match.getWorlds().getBlue().getPopulation().getNumericValue());
+        victoryMetricsBlue.put("victorypoints", input.getVictoryPoints().getBlue());
+        populationAttributes.put("name", input.getWorlds().getBlue().getName());
+        populationAttributes.put("population", input.getWorlds().getBlue().getPopulation().getNumericValue());
         victoryMetricsBlue.put("population", populationAttributes.clone());
         populationAttributes.clear();
 
         HashMap<String, Object> victoryMetricsGreen = new HashMap<>();
-        victoryMetricsGreen.put("victorypoints", match.getVictoryPoints().getGreen());
-        populationAttributes.put("name", match.getWorlds().getGreen().getName());
-        populationAttributes.put("population", match.getWorlds().getGreen().getPopulation().getNumericValue());
+        victoryMetricsGreen.put("victorypoints", input.getVictoryPoints().getGreen());
+        populationAttributes.put("name", input.getWorlds().getGreen().getName());
+        populationAttributes.put("population", input.getWorlds().getGreen().getPopulation().getNumericValue());
         victoryMetricsGreen.put("population", populationAttributes.clone());
         populationAttributes.clear();
 
@@ -54,7 +56,9 @@ public class RetrieveVictoryMetricsAsBSONDocumentForMatch extends DoFn<Match, Do
         victoryMetrics.put("green", victoryMetricsGreen);
 
         document.put("victorymetrics", victoryMetrics);
-        document.put("timestamp", RetrieveProcessingTimestampHelper.retrieveTimestamp());
+        document.put("timestamp", input.getTimestamp());
+        document.put("starttime", input.getStartTime());
+        document.put("endtime", input.getEndTime());
 
         outputReceiver.output(document);
     }

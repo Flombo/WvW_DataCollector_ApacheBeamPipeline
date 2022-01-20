@@ -24,7 +24,9 @@ import java.util.List;
  *     redmap : {..},
  *     bluemap : {..},
  *     greenmap : {..},
- *     timestamp : ''
+ *     timestamp : '',
+ *     starttime : '',
+ *     endtime : ''
  * }
  */
 public class GetCurrentBonusesAsBSONDocument extends DoFn<Match, Document>
@@ -71,7 +73,9 @@ public class GetCurrentBonusesAsBSONDocument extends DoFn<Match, Document>
         result.put(GreenHome.getName(), GreenHome.getBonuses());
 
         document.putAll(mapbonuses);
-        document.put("timestamp", RetrieveProcessingTimestampHelper.retrieveTimestamp());
+        document.put("timestamp", input.getTimestamp());
+        document.put("starttime", input.getStartTime());
+        document.put("endtime", input.getEndTime());
 
         out.output(document);
 

@@ -19,6 +19,9 @@ public class Match implements Serializable
     private String id;
     @JsonProperty("start_time")
     private String startTime;
+    @JsonProperty("end_time")
+    private String endTime;
+    private String timestamp;
     private TeamAttribute scores;
     private World worlds;
     private TeamAttribute deaths;
@@ -27,13 +30,13 @@ public class Match implements Serializable
     private TeamAttribute victoryPoints;
     private List<WVWMap> maps;
 
-
-
     @Override
     public String toString() {
-        return "Models.Match{" +
+        return "Match{" +
                 "id='" + id + '\'' +
                 ", startTime='" + startTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 ", scores=" + scores +
                 ", worlds=" + worlds +
                 ", deaths=" + deaths +

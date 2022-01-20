@@ -18,7 +18,9 @@ import java.util.List;
  *          mapname : '',
  *          flips : 100
  *     }],
- *     timestamp : ''
+ *     timestamp : '',
+ *     starttime : '',
+ *     endtime : ''
  * }
  */
 public class RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation extends DoFn<Match, Document>
@@ -41,7 +43,9 @@ public class RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation exten
         }
 
         document.put("totalflips", totalFlipsList);
-        document.put("timestamp", RetrieveProcessingTimestampHelper.retrieveTimestamp());
+        document.put("timestamp", input.getTimestamp());
+        document.put("starttime", input.getStartTime());
+        document.put("endtime", input.getEndTime());
 
         out.output(document);
 

@@ -15,7 +15,9 @@ import java.util.HashMap;
  *     },
  *     blue : {},
  *     green : {},
- *     timestamp : ''
+ *     timestamp : '',
+ *     starttime : '',
+ *     endtime : ''
  * }
  */
 public class ExtractPopulationAsBSONDocument extends DoFn<Match, Document>
@@ -46,7 +48,9 @@ public class ExtractPopulationAsBSONDocument extends DoFn<Match, Document>
         populationMap.put("green", populationGreen);
 
         document.putAll(populationMap);
-        document.put("timestamp", RetrieveProcessingTimestampHelper.retrieveTimestamp());
+        document.put("timestamp", input.getTimestamp());
+        document.put("starttime", input.getStartTime());
+        document.put("endtime", input.getEndTime());
 
         out.output(document);
 
