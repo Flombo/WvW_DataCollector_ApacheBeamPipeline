@@ -23,7 +23,7 @@ public class Match implements Serializable
     private String endTime;
     private String timestamp;
     private TeamAttribute scores;
-    private World worlds;
+    private WorldContainer worlds;
     private TeamAttribute deaths;
     private TeamAttribute kills;
     @JsonProperty("victory_points")

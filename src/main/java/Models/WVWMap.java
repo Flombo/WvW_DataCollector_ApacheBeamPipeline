@@ -9,7 +9,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WVWMap implements Serializable
 {
-    private int id;
+    private String id;
     private String name;
     private String type;
     private TeamAttribute scores;

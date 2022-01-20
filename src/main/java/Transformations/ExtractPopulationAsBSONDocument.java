@@ -1,7 +1,7 @@
 package Transformations;
 
 import Models.Match;
-import Models.World;
+import Models.WorldContainer;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.bson.Document;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class ExtractPopulationAsBSONDocument extends DoFn<Match, Document>
     public void processElement(@Element Match input, OutputReceiver<Document> out)
     {
         Document document = new Document();
-        World worlds = input.getWorlds();
+        WorldContainer worlds = input.getWorlds();
 
         HashMap<String, HashMap<String, Object>> populationMap = new HashMap<>();
 

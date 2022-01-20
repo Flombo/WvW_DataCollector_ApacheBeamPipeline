@@ -8,16 +8,16 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class World implements Serializable {
 
-    private WorldObject red;
-    private WorldObject blue;
-    private WorldObject green;
+    private String name;
+    private Population population;
 
     @Override
     public String toString() {
         return "Models.World{" +
-                "red=" + red +
-                ", blue=" + blue +
-                ", green=" + green +
+                "name='" + name + '\'' +
+                ", population='" + population + '\'' +
+                ", population-numeric-value=" + population.getNumericValue() +
                 '}';
     }
+
 }
