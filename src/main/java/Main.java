@@ -1,4 +1,6 @@
 import Models.Match;
+import ResultModels.TotalFlip;
+import TransformationModels.TotalFlipsTransformationModel;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -13,6 +15,7 @@ import org.apache.beam.sdk.values.*;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.bson.Document;
+import org.checkerframework.checker.units.qual.K;
 import org.joda.time.Duration;
 
 public class Main
@@ -35,7 +38,18 @@ public class Main
                             .withTopic(topicName)
                             .withKeyDeserializer(LongDeserializer.class)
                             .withValueDeserializer(StringDeserializer.class)
-            );
+            ).apply(Window.<KafkaRecord<Long, String>>configure()
+                    .discardingFiredPanes()
+                    .triggering(
+                            Repeatedly.forever(
+                                    AfterFirst.of(
+                                            AfterPane.elementCountAtLeast(10),
+                                            AfterProcessingTime
+                                                    .pastFirstElementInPane()
+                                                    .plusDelayOf(Duration.standardMinutes(2))
+                                    )
+                            )
+                    ));
 
             /*
              * Extract the string values from the KafkaRecord for further processing.
@@ -50,22 +64,6 @@ public class Main
             PCollection<Match> matches = extractedJSONStrings
                     .apply(ParseJsons.of(Match.class))
                     .setCoder(SerializableCoder.of(Match.class));
-
-            //Matches in SlidingWindow with trigger that should be triggered when 2 Matches are reached or 2min have passed.
-            PCollection<Match> slidingWindowedMatches = matches.apply(
-                    Window.<Match>configure()
-                            .discardingFiredPanes()
-                            .triggering(
-                                    Repeatedly.forever(
-                                            AfterFirst.of(
-                                                    AfterPane.elementCountAtLeast(2),
-                                                    AfterProcessingTime
-                                                            .pastFirstElementInPane()
-                                                            .plusDelayOf(Duration.standardMinutes(2))
-                                            )
-                                    )
-                            )
-            );
 
 //            PCollectionList<Match> lastTwoMatches = matches.apply(Partition.of(2, new PartitionMatchCollectionTransformation()));
 
