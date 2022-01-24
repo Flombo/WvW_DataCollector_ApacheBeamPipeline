@@ -7,9 +7,9 @@ import org.apache.beam.sdk.extensions.jackson.ParseJsons;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
 import org.apache.beam.sdk.io.mongodb.MongoDbIO;
-import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.*;
 import org.apache.beam.sdk.transforms.windowing.*;
-import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.*;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.bson.Document;
@@ -67,7 +67,24 @@ public class Main
                             )
             );
 
-            PCollection<Document> totalFlipsDocuments = slidingWindowedMatches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
+//            PCollectionList<Match> lastTwoMatches = matches.apply(Partition.of(2, new PartitionMatchCollectionTransformation()));
+
+            System.out.println("----------------------------------------------------------");
+//            PCollection<Match> match1 = lastTwoMatches.get(0);
+            PCollection<KV<String, TotalFlipsTransformationModel>> totalFlipsKvpCollection = matches.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
+             PCollection<KV<String, Iterable<TotalFlipsTransformationModel>>> groupedTotalFlipsTransformationModelKV = totalFlipsKvpCollection.apply(GroupByKey.<String, TotalFlipsTransformationModel>create());
+            PCollection<TotalFlip> totalFlips = groupedTotalFlipsTransformationModelKV.apply(ParDo.of(new RetrieveTotalFlipsFromGroupedKVTransformation()));
+            PCollection<KV<String, TotalFlip>> totalFlipsKvpCollectionKV = totalFlips.apply(ParDo.of(new RetrieveTotalFlipsKVTransformation()));
+            PCollection<KV<String, Iterable<TotalFlip>>> groupedTotalFlips = totalFlipsKvpCollectionKV.apply(GroupByKey.<String, TotalFlip>create());
+            PCollection<TotalFlip> ultimateTotalFlips = groupedTotalFlips.apply(ParDo.of(new CombineKVTotalFlipsTransformation()));
+            ultimateTotalFlips.apply(ParDo.of(new PrintTotalFlip()));
+
+//
+//            PCollection<Match> match2 = lastTwoMatches.get(1);
+//            PCollection<KV<String, TotalFlipsTransformationModel>> totalFlipsKvpCollection2 = match2.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
+
+
+            PCollection<Document> totalFlipsDocuments = matches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
 
             PCollection<Document> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulationAsBSONDocument()));
 
@@ -76,33 +93,33 @@ public class Main
             PCollection<Document> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonusesAsBSONDocument()));
 
             //write totalFlipsDocuments into MongoDB totalflips-collection.
-            totalFlipsDocuments.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("totalflips")
-            );
-
-            populationPerWorld.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("peaktime")
-            );
-
-            victoryMetrics.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("victorymetrics")
-            );
-
-            bloodlustBuffs.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("mapbonuses")
-            );
+//            totalFlipsDocuments.apply(
+//                    MongoDbIO.write()
+//                            .withUri("mongodb://141.28.73.145:27017")
+//                            .withDatabase(topicName)
+//                            .withCollection("totalflips")
+//            );
+//
+//            populationPerWorld.apply(
+//                    MongoDbIO.write()
+//                            .withUri("mongodb://141.28.73.145:27017")
+//                            .withDatabase(topicName)
+//                            .withCollection("peaktime")
+//            );
+//
+//            victoryMetrics.apply(
+//                    MongoDbIO.write()
+//                            .withUri("mongodb://141.28.73.145:27017")
+//                            .withDatabase(topicName)
+//                            .withCollection("victorymetrics")
+//            );
+//
+//            bloodlustBuffs.apply(
+//                    MongoDbIO.write()
+//                            .withUri("mongodb://141.28.73.145:27017")
+//                            .withDatabase(topicName)
+//                            .withCollection("mapbonuses")
+//            );
 
             //Pipeline could crash due to exceptions while deserializing.
             try
