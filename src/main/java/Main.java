@@ -22,7 +22,6 @@ public class Main
 
     public static void main(String[] args)
     {
-
         try
         {
             String topicName = args[0];
@@ -87,34 +86,38 @@ public class Main
             PCollection<Document> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsAsBSONDocumentForMatch()));
             PCollection<Document> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonusesAsBSONDocument()));
 
-            //write totalFlipsDocuments into MongoDB totalflips-collection.
-            totalFlipsDocuments.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("totalflips")
-            );
+            try {
+                //write totalFlipsDocuments into MongoDB totalflips-collection.
+                totalFlipsDocuments.apply(
+                        MongoDbIO.write()
+                                .withUri("mongodb://141.28.73.145:27017")
+                                .withDatabase(topicName)
+                                .withCollection("totalflips")
+                );
 
-            populationPerWorld.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("peaktime")
-            );
+                populationPerWorld.apply(
+                        MongoDbIO.write()
+                                .withUri("mongodb://141.28.73.145:27017")
+                                .withDatabase(topicName)
+                                .withCollection("peaktime")
+                );
 
-            victoryMetrics.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("victorymetrics")
-            );
+                victoryMetrics.apply(
+                        MongoDbIO.write()
+                                .withUri("mongodb://141.28.73.145:27017")
+                                .withDatabase(topicName)
+                                .withCollection("victorymetrics")
+                );
 
-            bloodlustBuffs.apply(
-                    MongoDbIO.write()
-                            .withUri("mongodb://141.28.73.145:27017")
-                            .withDatabase(topicName)
-                            .withCollection("mapbonuses")
-            );
+                bloodlustBuffs.apply(
+                        MongoDbIO.write()
+                                .withUri("mongodb://141.28.73.145:27017")
+                                .withDatabase(topicName)
+                                .withCollection("mapbonuses")
+                );
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
 
             //Pipeline could crash due to exceptions while deserializing.
             try
