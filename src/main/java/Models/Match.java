@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -44,5 +45,18 @@ public class Match implements Serializable
                 ", victoryPoints=" + victoryPoints +
                 ", maps=" + maps +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Match match = (Match) o;
+        return getId().equals(match.getId()) && getStartTime().equals(match.getStartTime()) && getEndTime().equals(match.getEndTime()) && getTimestamp().equals(match.getTimestamp()) && Objects.equals(getScores(), match.getScores()) && Objects.equals(getWorlds(), match.getWorlds()) && Objects.equals(getDeaths(), match.getDeaths()) && Objects.equals(getKills(), match.getKills()) && Objects.equals(getVictoryPoints(), match.getVictoryPoints()) && getMaps().equals(match.getMaps());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getStartTime(), getEndTime(), getTimestamp(), getScores(), getWorlds(), getDeaths(), getKills(), getVictoryPoints(), getMaps());
     }
 }

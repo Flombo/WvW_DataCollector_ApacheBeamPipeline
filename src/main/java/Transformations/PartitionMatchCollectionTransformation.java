@@ -1,14 +1,15 @@
 package Transformations;
 
-import Models.Match;
+import ResultModels.TotalFlip;
 import org.apache.beam.sdk.transforms.Partition;
+import org.apache.beam.sdk.values.KV;
 
-public class PartitionMatchCollectionTransformation implements Partition.PartitionFn<Match> {
+public class PartitionMatchCollectionTransformation implements Partition.PartitionFn<KV<String, TotalFlip>> {
 
         private int i = 0;
 
         @Override
-        public int partitionFor(Match match, int numPartitions) {
+        public int partitionFor(KV<String, TotalFlip> stringTotalFlipKV, int numPartitions) {
 
                 int partitionNumber = i;
 

@@ -1,10 +1,9 @@
 package TransformationModels;
 
 import ResultModels.ResultModel;
-
 import java.io.Serializable;
 
-public class TotalFlipsTransformationModel extends ResultModel implements Serializable {
+public class ObjectiveFlip extends ResultModel implements Serializable {
 
     private String identifier;
     private String map;
@@ -15,8 +14,8 @@ public class TotalFlipsTransformationModel extends ResultModel implements Serial
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setIdentifier(String mapName, String objectiveID) {
+        this.identifier = (mapName + "~" + objectiveID).replaceAll(" ", "");
     }
 
     public String getMap() {
@@ -46,11 +45,13 @@ public class TotalFlipsTransformationModel extends ResultModel implements Serial
     @Override
     public String toString() {
         return "TotalFlipsTransformationModel{" +
-                "identifier='" + identifier + '\'' +
+                "timestamp='" + timestamp + '\'' +
+                ", starttime='" + starttime + '\'' +
+                ", endtime='" + endtime + '\'' +
+                ", identifier='" + identifier + '\'' +
                 ", map='" + map + '\'' +
                 ", objective='" + objective + '\'' +
                 ", owner='" + owner + '\'' +
                 '}';
     }
-
 }

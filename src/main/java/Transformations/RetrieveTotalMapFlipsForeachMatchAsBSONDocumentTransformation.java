@@ -1,20 +1,18 @@
 package Transformations;
 
-import Models.Match;
-import Models.Objective;
-import Models.WVWMap;
+import ResultModels.TotalFlip;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.values.KV;
 import org.bson.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /***
  * Retrieves the flips foreach Match in a BSONDocument.
  * The transformation checks if the old lastFlip is not equal to the current-lastFlip foreach map.
  * Format:
  * {
- *     totalflips : [{
+ *     totalflip : [{
  *          mapname : '',
  *          flips : 100
  *     }],
@@ -23,51 +21,50 @@ import java.util.List;
  *     endtime : ''
  * }
  */
-public class RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation extends DoFn<Match, Document>
+public class RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation extends DoFn<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>, Document>
 {
 
-    private static String lastFlip;
-
     @ProcessElement
-    public void processElement(@Element Match input, OutputReceiver<Document> out)
+    public void processElement(@Element KV<String, Iterable<KV<String, Iterable<TotalFlip>>>> input, OutputReceiver<Document> out)
     {
         Document document = new Document();
-        ArrayList<HashMap<String, Object>> totalFlipsList = new ArrayList<>();
 
-        for (WVWMap map : input.getMaps()) {
-            long totalMapFlipAmount = getTotalFlipsPerObjective(map.getObjectives());
+        Iterable<KV<String, Iterable<TotalFlip>>> totalFlipsGroupedByMapName = input.getValue();
+
+        String timestamp = "";
+        String endtime = "";
+        String starttime = "";
+
+        ArrayList<HashMap<String, Object>> totalFlips = new ArrayList<>();
+
+        for (KV<String, Iterable<TotalFlip>> totalFlipGroupedByMapName : totalFlipsGroupedByMapName) {
+
+            long flips = 0;
+
+            Iterable<TotalFlip> totalFlipsOfMap = totalFlipGroupedByMapName.getValue();
+
+            for (TotalFlip totalFlipByMapName : totalFlipsOfMap) {
+                flips += totalFlipByMapName.getTotalFlips();
+                timestamp = totalFlipByMapName.getTimestamp();
+                endtime = totalFlipByMapName.getEndtime();
+                starttime = totalFlipByMapName.getStarttime();
+            }
+
+
             HashMap<String, Object> totalFlipsAttributesHashMap = new HashMap<>();
-            totalFlipsAttributesHashMap.put("mapname", map.getName());
-            totalFlipsAttributesHashMap.put("flips", totalMapFlipAmount);
-            totalFlipsList.add(totalFlipsAttributesHashMap);
+            totalFlipsAttributesHashMap.put("mapname", totalFlipGroupedByMapName.getKey());
+            totalFlipsAttributesHashMap.put("flips", flips);
+
+            totalFlips.add(totalFlipsAttributesHashMap);
         }
 
-        document.put("totalflips", totalFlipsList);
-        document.put("timestamp", input.getTimestamp());
-        document.put("starttime", input.getStartTime());
-        document.put("endtime", input.getEndTime());
+        document.put("totalflips", totalFlips);
+        document.put("timestamp", timestamp);
+        document.put("starttime", starttime);
+        document.put("endtime", endtime);
 
         out.output(document);
 
-    }
-
-    private long getTotalFlipsPerObjective(List<Objective> objectives) {
-
-        long totalMapFlipAmount = 0;
-
-        for (Objective objective : objectives) {
-
-            String currentLastFlipped = objective.getLastFlipped();
-
-            if(lastFlip != null) {
-                if(!lastFlip.equals(currentLastFlipped)) {
-                    totalMapFlipAmount++;
-                }
-            }
-            lastFlip = currentLastFlipped;
-        }
-
-        return totalMapFlipAmount;
     }
 
 }

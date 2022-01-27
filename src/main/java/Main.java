@@ -1,6 +1,6 @@
 import Models.Match;
 import ResultModels.TotalFlip;
-import TransformationModels.TotalFlipsTransformationModel;
+import TransformationModels.ObjectiveFlip;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -15,7 +15,6 @@ import org.apache.beam.sdk.values.*;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.bson.Document;
-import org.checkerframework.checker.units.qual.K;
 import org.joda.time.Duration;
 
 public class Main
@@ -38,18 +37,16 @@ public class Main
                             .withTopic(topicName)
                             .withKeyDeserializer(LongDeserializer.class)
                             .withValueDeserializer(StringDeserializer.class)
-            ).apply(Window.<KafkaRecord<Long, String>>configure()
-                    .discardingFiredPanes()
-                    .triggering(
-                            Repeatedly.forever(
-                                    AfterFirst.of(
-                                            AfterPane.elementCountAtLeast(10),
-                                            AfterProcessingTime
-                                                    .pastFirstElementInPane()
-                                                    .plusDelayOf(Duration.standardMinutes(2))
+            ).apply(
+                    Window.<KafkaRecord<Long, String>>into(FixedWindows.of(Duration.standardMinutes(2)))
+                            .discardingFiredPanes()
+                            .withAllowedLateness(Duration.standardSeconds(5))
+                            .triggering(
+                                    Repeatedly.forever(
+                                            AfterAll.of(AfterPane.elementCountAtLeast(2), AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardSeconds(5)))
                                     )
                             )
-                    ));
+            );
 
             /*
              * Extract the string values from the KafkaRecord for further processing.
@@ -65,59 +62,59 @@ public class Main
                     .apply(ParseJsons.of(Match.class))
                     .setCoder(SerializableCoder.of(Match.class));
 
-//            PCollectionList<Match> lastTwoMatches = matches.apply(Partition.of(2, new PartitionMatchCollectionTransformation()));
+            PCollection<KV<String, ObjectiveFlip>> totalFlipsKvpCollection = matches.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
+            PCollection<KV<String, Iterable<ObjectiveFlip>>> groupedTotalFlipsTransformationModelKV = totalFlipsKvpCollection.apply(GroupByKey.create());
 
-            System.out.println("----------------------------------------------------------");
-//            PCollection<Match> match1 = lastTwoMatches.get(0);
-            PCollection<KV<String, TotalFlipsTransformationModel>> totalFlipsKvpCollection = matches.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
-             PCollection<KV<String, Iterable<TotalFlipsTransformationModel>>> groupedTotalFlipsTransformationModelKV = totalFlipsKvpCollection.apply(GroupByKey.<String, TotalFlipsTransformationModel>create());
             PCollection<TotalFlip> totalFlips = groupedTotalFlipsTransformationModelKV.apply(ParDo.of(new RetrieveTotalFlipsFromGroupedKVTransformation()));
             PCollection<KV<String, TotalFlip>> totalFlipsKvpCollectionKV = totalFlips.apply(ParDo.of(new RetrieveTotalFlipsKVTransformation()));
-            PCollection<KV<String, Iterable<TotalFlip>>> groupedTotalFlips = totalFlipsKvpCollectionKV.apply(GroupByKey.<String, TotalFlip>create());
-            PCollection<TotalFlip> ultimateTotalFlips = groupedTotalFlips.apply(ParDo.of(new CombineKVTotalFlipsTransformation()));
-            ultimateTotalFlips.apply(ParDo.of(new PrintTotalFlip()));
+            PCollection<KV<String, Iterable<TotalFlip>>> groupedByMapNameTotalFlips = totalFlipsKvpCollectionKV.apply(GroupByKey.create());
+            PCollection<KV<String, KV<String, Iterable<TotalFlip>>>> finalGroupedFlips = groupedByMapNameTotalFlips.apply(
+                    WithKeys.of(
+                            new SerializableFunction<KV<String, Iterable<TotalFlip>>, String>() {
+                                @Override
+                                public String apply(KV<String, Iterable<TotalFlip>> input) {
+                                    return "totalflips";
+                                }
+                            }
+                    )
+            );
 
-//
-//            PCollection<Match> match2 = lastTwoMatches.get(1);
-//            PCollection<KV<String, TotalFlipsTransformationModel>> totalFlipsKvpCollection2 = match2.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
+            PCollection<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>> finalTotalFlipGroup = finalGroupedFlips.apply(GroupByKey.create());
 
-
-            PCollection<Document> totalFlipsDocuments = matches.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
+            PCollection<Document> totalFlipsDocuments = finalTotalFlipGroup.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
 
             PCollection<Document> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulationAsBSONDocument()));
-
             PCollection<Document> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsAsBSONDocumentForMatch()));
-
             PCollection<Document> bloodlustBuffs = matches.apply(ParDo.of(new GetCurrentBonusesAsBSONDocument()));
 
             //write totalFlipsDocuments into MongoDB totalflips-collection.
-//            totalFlipsDocuments.apply(
-//                    MongoDbIO.write()
-//                            .withUri("mongodb://141.28.73.145:27017")
-//                            .withDatabase(topicName)
-//                            .withCollection("totalflips")
-//            );
-//
-//            populationPerWorld.apply(
-//                    MongoDbIO.write()
-//                            .withUri("mongodb://141.28.73.145:27017")
-//                            .withDatabase(topicName)
-//                            .withCollection("peaktime")
-//            );
-//
-//            victoryMetrics.apply(
-//                    MongoDbIO.write()
-//                            .withUri("mongodb://141.28.73.145:27017")
-//                            .withDatabase(topicName)
-//                            .withCollection("victorymetrics")
-//            );
-//
-//            bloodlustBuffs.apply(
-//                    MongoDbIO.write()
-//                            .withUri("mongodb://141.28.73.145:27017")
-//                            .withDatabase(topicName)
-//                            .withCollection("mapbonuses")
-//            );
+            totalFlipsDocuments.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("totalflips")
+            );
+
+            populationPerWorld.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("peaktime")
+            );
+
+            victoryMetrics.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("victorymetrics")
+            );
+
+            bloodlustBuffs.apply(
+                    MongoDbIO.write()
+                            .withUri("mongodb://141.28.73.145:27017")
+                            .withDatabase(topicName)
+                            .withCollection("mapbonuses")
+            );
 
             //Pipeline could crash due to exceptions while deserializing.
             try

@@ -1,35 +1,36 @@
 package Transformations;
 
 import ResultModels.TotalFlip;
-import TransformationModels.TotalFlipsTransformationModel;
+import TransformationModels.ObjectiveFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.KV;
-
 import java.util.Objects;
 
-public class RetrieveTotalFlipsFromGroupedKVTransformation extends DoFn<KV<String, Iterable<TotalFlipsTransformationModel>>, TotalFlip> {
+public class RetrieveTotalFlipsFromGroupedKVTransformation extends DoFn<KV<String, Iterable<ObjectiveFlip>>, TotalFlip> {
 
     @ProcessElement
-    public void processElement(@Element KV<String, Iterable<TotalFlipsTransformationModel>> input, OutputReceiver<TotalFlip> outputReceiver) {
-        TotalFlip totalFlip = new TotalFlip();
+    public void processElement(@Element KV<String, Iterable<ObjectiveFlip>> input, OutputReceiver<TotalFlip> outputReceiver) {
         String currentOwner = null;
         long flips = 0;
 
-        for(TotalFlipsTransformationModel totalFlipsTransformationModel : Objects.requireNonNull(input.getValue())) {
+        TotalFlip totalFlip = new TotalFlip();
+
+        for(ObjectiveFlip objectiveFlip : Objects.requireNonNull(input.getValue())) {
 
             if(currentOwner != null) {
-                if(!currentOwner.equals(totalFlipsTransformationModel.getOwner())) {
+                if(!currentOwner.equals(objectiveFlip.getOwner())) {
                     flips++;
                 }
             }
 
             totalFlip.setTotalFlips(flips);
-            totalFlip.setMapname(totalFlipsTransformationModel.getMap());
-            totalFlip.setEndtime(totalFlipsTransformationModel.getEndtime());
-            totalFlip.setStarttime(totalFlipsTransformationModel.getStarttime());
-            totalFlip.setTimestamp(totalFlipsTransformationModel.getTimestamp());
+            totalFlip.setMapname(objectiveFlip.getMap().replaceAll(" ", ""));
+            totalFlip.setEndtime(objectiveFlip.getEndtime());
+            totalFlip.setStarttime(objectiveFlip.getStarttime());
+            totalFlip.setTimestamp(objectiveFlip.getTimestamp());
 
-            currentOwner = totalFlipsTransformationModel.getOwner();
+            currentOwner = objectiveFlip.getOwner();
+
         }
 
         outputReceiver.output(totalFlip);

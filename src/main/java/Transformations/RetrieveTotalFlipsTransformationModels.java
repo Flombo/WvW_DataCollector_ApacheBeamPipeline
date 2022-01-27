@@ -3,21 +3,21 @@ package Transformations;
 import Models.Match;
 import Models.WVWMap;
 import Models.Objective;
-import TransformationModels.TotalFlipsTransformationModel;
+import TransformationModels.ObjectiveFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.KV;
 
-public class RetrieveTotalFlipsTransformationModels extends DoFn<Match, KV<String, TotalFlipsTransformationModel>>{
+public class RetrieveTotalFlipsTransformationModels extends DoFn<Match, KV<String, ObjectiveFlip>>{
 
     @ProcessElement
-    public void ProcessElement(@Element Match input, OutputReceiver<KV<String, TotalFlipsTransformationModel>> outputReceiver) {
+    public void ProcessElement(@Element Match input, OutputReceiver<KV<String, ObjectiveFlip>> outputReceiver) {
 
         for(WVWMap map : input.getMaps()) {
             String mapName = map.getName();
 
             for (Objective objective: map.getObjectives()) {
 
-                TotalFlipsTransformationModel totalFlipsTransformationModel = new TotalFlipsTransformationModel();
+                ObjectiveFlip totalFlipsTransformationModel = new ObjectiveFlip();
                 totalFlipsTransformationModel.setTimestamp(input.getTimestamp());
                 totalFlipsTransformationModel.setStarttime(input.getStartTime());
                 totalFlipsTransformationModel.setEndtime(input.getEndTime());
@@ -25,7 +25,7 @@ public class RetrieveTotalFlipsTransformationModels extends DoFn<Match, KV<Strin
                 String objectiveType = objective.getType();
                 totalFlipsTransformationModel.setMap(mapName);
                 totalFlipsTransformationModel.setOwner(owner);
-                totalFlipsTransformationModel.setIdentifier(mapName + objective.getId());
+                totalFlipsTransformationModel.setIdentifier(mapName, objective.getId());
                 totalFlipsTransformationModel.setObjective(objectiveType);
 
                 outputReceiver.output(KV.of(totalFlipsTransformationModel.getIdentifier(), totalFlipsTransformationModel));
