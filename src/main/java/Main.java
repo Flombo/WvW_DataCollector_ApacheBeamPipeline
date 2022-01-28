@@ -16,6 +16,8 @@ import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.bson.Document;
 import org.joda.time.Duration;
+import java.util.Collection;
+import java.util.Objects;
 
 public class Main
 {
@@ -79,6 +81,12 @@ public class Main
             );
 
             PCollection<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>> finalTotalFlipGroup = finalGroupedFlips.apply(GroupByKey.create());
+            finalTotalFlipGroup.apply(Filter.by(new SerializableFunction<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>, Boolean>() {
+                @Override
+                public Boolean apply(KV<String, Iterable<KV<String, Iterable<TotalFlip>>>> input) {
+                    return ((Collection<KV<String, Iterable<TotalFlip>>>) Objects.requireNonNull(input.getValue())).size() == 4;
+                }
+            }));
 
             PCollection<Document> totalFlipsDocuments = finalTotalFlipGroup.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
 
