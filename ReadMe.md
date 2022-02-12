@@ -1,3 +1,9 @@
+#WvW DataCollector-Pipeline
+
+This pipeline aggregates and transforms data, from the official GW2-API, which was pulled and extended in the WVW-DataCollector-Backend and persisted into Kafka.
+The resulting complex events are the total conquests on each map, the server population, the victory metrics and the map bonuses foreach EU-Match.
+These results will be persisted into a MongoDB.
+
 #Instructions
 
 1. Kafka Cheatsheet 
@@ -30,7 +36,3 @@
 3. Start Zookeeper, Kafka and JS server via Script
    1. Go to ~/Project/Java/
    2. Run: bash initializtion.sh
-4. Start Grafana
-   1. sudo systemctl start grafana-server
-   2. Grafana aufrufen unter: http://141.28.73.146:8000/
-   3. Username/Passwd: admin
