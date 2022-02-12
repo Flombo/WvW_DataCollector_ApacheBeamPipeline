@@ -1,10 +1,10 @@
-#WvW DataCollector-Pipeline
+# WvW DataCollector-Pipeline
 
    This pipeline aggregates and transforms data, from the official GW2-API, which was pulled and extended in the WVW-DataCollector-Backend and persisted into Kafka.
    The resulting complex events are the total conquests on each map, the server population, the victory metrics and the map bonuses foreach EU-Match.
    These results will be persisted into a MongoDB.
 
-#Instructions
+# Instructions
 
    1. Kafka Cheatsheet 
       ```
