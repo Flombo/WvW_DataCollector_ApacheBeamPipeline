@@ -36,3 +36,5 @@
    3. Start Zookeeper, Kafka and JS server via Script
       1. Go to ~/Project/Java/
       2. Run: bash initializtion.sh
+
+> 2022 Shirin Mian & Florian Pfützenreuter
