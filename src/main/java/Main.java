@@ -1,5 +1,5 @@
 import Models.Match;
-import ResultModels.TotalFlip;
+import TransformationModels.TotalFlip;
 import TransformationModels.ObjectiveFlip;
 import Transformations.*;
 import org.apache.beam.sdk.Pipeline;
@@ -63,7 +63,7 @@ public class Main
                     .apply(ParseJsons.of(Match.class))
                     .setCoder(SerializableCoder.of(Match.class));
 
-            PCollection<KV<String, ObjectiveFlip>> totalFlipsKvpCollection = matches.apply(ParDo.of(new RetrieveTotalFlipsTransformationModels()));
+            PCollection<KV<String, ObjectiveFlip>> totalFlipsKvpCollection = matches.apply(ParDo.of(new RetrieveObjectiveFlips()));
             PCollection<KV<String, Iterable<ObjectiveFlip>>> groupedTotalFlipsTransformationModelKV = totalFlipsKvpCollection.apply(GroupByKey.create());
 
             PCollection<TotalFlip> totalFlips = groupedTotalFlipsTransformationModelKV.apply(ParDo.of(new RetrieveTotalFlipsFromGroupedKVTransformation()));
@@ -81,14 +81,14 @@ public class Main
             );
 
             PCollection<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>> finalTotalFlipGroup = finalGroupedFlips.apply(GroupByKey.create());
-            finalTotalFlipGroup.apply(Filter.by(new SerializableFunction<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>, Boolean>() {
+            PCollection<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>> filteredFinalTotalFlipGroup = finalTotalFlipGroup.apply(Filter.by(new SerializableFunction<KV<String, Iterable<KV<String, Iterable<TotalFlip>>>>, Boolean>() {
                 @Override
                 public Boolean apply(KV<String, Iterable<KV<String, Iterable<TotalFlip>>>> input) {
                     return ((Collection<KV<String, Iterable<TotalFlip>>>) Objects.requireNonNull(input.getValue())).size() == 4;
                 }
             }));
 
-            PCollection<Document> totalFlipsDocuments = finalTotalFlipGroup.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
+            PCollection<Document> totalFlipsDocuments = filteredFinalTotalFlipGroup.apply(ParDo.of(new RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation()));
 
             PCollection<Document> populationPerWorld = matches.apply(ParDo.of(new ExtractPopulationAsBSONDocument()));
             PCollection<Document> victoryMetrics = matches.apply(ParDo.of(new RetrieveVictoryMetricsAsBSONDocumentForMatch()));

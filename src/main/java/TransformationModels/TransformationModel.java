@@ -1,14 +1,14 @@
-package ResultModels;
+package TransformationModels;
 
 import java.io.Serializable;
 
-public class ResultModel implements Serializable {
+public class TransformationModel implements Serializable {
 
     protected String timestamp;
     protected String starttime;
     protected String endtime;
 
-    public ResultModel() {
+    public TransformationModel() {
     }
 
     public String getTimestamp() {

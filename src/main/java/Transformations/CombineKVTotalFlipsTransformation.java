@@ -1,8 +1,10 @@
 package Transformations;
 
-import ResultModels.TotalFlip;
+import TransformationModels.TotalFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.KV;
+
+import java.util.Objects;
 
 public class CombineKVTotalFlipsTransformation extends DoFn<KV<String, Iterable<TotalFlip>>, TotalFlip> {
 
@@ -11,7 +13,7 @@ public class CombineKVTotalFlipsTransformation extends DoFn<KV<String, Iterable<
         TotalFlip ultimateTotalFlip = new TotalFlip();
         long flips = 0;
 
-        for (TotalFlip totalFlip : input.getValue()) {
+        for (TotalFlip totalFlip : Objects.requireNonNull(input.getValue())) {
 
             flips += totalFlip.getTotalFlips();
             ultimateTotalFlip.setTimestamp(totalFlip.getTimestamp());
@@ -21,7 +23,7 @@ public class CombineKVTotalFlipsTransformation extends DoFn<KV<String, Iterable<
         }
 
         ultimateTotalFlip.setTotalFlips(flips);
-        ultimateTotalFlip.setMapname(input.getKey());
+        ultimateTotalFlip.setMapName(input.getKey());
 
         outputReceiver.output(ultimateTotalFlip);
     }

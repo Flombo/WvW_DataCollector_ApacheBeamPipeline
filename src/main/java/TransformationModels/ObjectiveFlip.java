@@ -1,9 +1,6 @@
 package TransformationModels;
 
-import ResultModels.ResultModel;
-import java.io.Serializable;
-
-public class ObjectiveFlip extends ResultModel implements Serializable {
+public class ObjectiveFlip extends TransformationModel {
 
     private String identifier;
     private String map;

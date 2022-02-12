@@ -1,11 +1,12 @@
 package Transformations;
 
-import ResultModels.TotalFlip;
+import TransformationModels.TotalFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.KV;
 import org.bson.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /***
  * Retrieves the flips foreach Match in a BSONDocument.
@@ -37,13 +38,13 @@ public class RetrieveTotalMapFlipsForeachMatchAsBSONDocumentTransformation exten
 
         ArrayList<HashMap<String, Object>> totalFlips = new ArrayList<>();
 
-        for (KV<String, Iterable<TotalFlip>> totalFlipGroupedByMapName : totalFlipsGroupedByMapName) {
+        for (KV<String, Iterable<TotalFlip>> totalFlipGroupedByMapName : Objects.requireNonNull(totalFlipsGroupedByMapName)) {
 
             long flips = 0;
 
             Iterable<TotalFlip> totalFlipsOfMap = totalFlipGroupedByMapName.getValue();
 
-            for (TotalFlip totalFlipByMapName : totalFlipsOfMap) {
+            for (TotalFlip totalFlipByMapName : Objects.requireNonNull(totalFlipsOfMap)) {
                 flips += totalFlipByMapName.getTotalFlips();
                 timestamp = totalFlipByMapName.getTimestamp();
                 endtime = totalFlipByMapName.getEndtime();

@@ -1,8 +1,4 @@
-package ResultModels;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+package TransformationModels;
 
 /**
  *  BSON-Format:
@@ -16,16 +12,16 @@ import java.util.HashMap;
  *      endtime : ''
  *  }
  */
-public class TotalFlip extends ResultModel implements Serializable {
+public class TotalFlip extends TransformationModel {
 
     private String mapname;
     private Long totalFlips;
 
-    public void setMapname(String mapname) {
-        this.mapname = mapname;
+    public void setMapName(String mapName) {
+        this.mapname = mapName;
     }
 
-    public String getMapname() {
+    public String getMapName() {
         return mapname;
     }
 

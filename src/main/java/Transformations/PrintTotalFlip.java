@@ -1,6 +1,6 @@
 package Transformations;
 
-import ResultModels.TotalFlip;
+import TransformationModels.TotalFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 
 public class PrintTotalFlip extends DoFn<TotalFlip, String>

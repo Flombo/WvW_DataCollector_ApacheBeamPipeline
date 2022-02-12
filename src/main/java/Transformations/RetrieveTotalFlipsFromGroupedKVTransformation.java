@@ -1,6 +1,6 @@
 package Transformations;
 
-import ResultModels.TotalFlip;
+import TransformationModels.TotalFlip;
 import TransformationModels.ObjectiveFlip;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.values.KV;
@@ -24,7 +24,7 @@ public class RetrieveTotalFlipsFromGroupedKVTransformation extends DoFn<KV<Strin
             }
 
             totalFlip.setTotalFlips(flips);
-            totalFlip.setMapname(objectiveFlip.getMap().replaceAll(" ", ""));
+            totalFlip.setMapName(objectiveFlip.getMap().replaceAll(" ", ""));
             totalFlip.setEndtime(objectiveFlip.getEndtime());
             totalFlip.setStarttime(objectiveFlip.getStarttime());
             totalFlip.setTimestamp(objectiveFlip.getTimestamp());
